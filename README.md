@@ -20,13 +20,11 @@ The DLL is unsigned. Source, build scripts and SHA-256 checksums are provided so
 
 ## Compatibility
 
-Targets the x86 Tiberium Wars 1.9 executable with this SHA-256:
+Recognizes the x86 Tiberium Wars engine (`cnc3game.dat` or `cnc3game.exe`) without an executable SHA-256 allowlist. The 4 GB / Large Address Aware patch and changes to PE timestamps or checksums no longer disable rotation.
 
-```text
-FB0CB9BBE40AD429743DDABE614150514FFFA9DDBDE1E091A7760E9AB8C21958
-```
+Before installing hooks, the DLL checks the engine's in-memory camera function, radar update, view-box pointer and input call sites. These checks target the supported Tiberium Wars 1.9 layout. A different engine layout still needs matching hook locations; identifying a file as Tiberium Wars does not make arbitrary addresses compatible. Unsupported layouts keep DirectInput forwarding and leave rotation disabled.
 
-Other executables keep DirectInput forwarding, but the rotation hooks stay disabled. It loads from the base game, so it does not need to be added to each mod. Custom HUDs and other DLL wrappers may need additional support; compatibility with every mod is not established.
+It loads from the base game and does not need to be added to each mod. Custom HUDs and other DLL wrappers may need additional support. Download checksums remain available for verifying release files; they do not control runtime activation.
 
 ## Build
 

@@ -8,6 +8,6 @@ $sources = @('extension.c','executable_guard.c','camera_adapter.c','composite.c'
 $buildDir = Join-Path $PSScriptRoot 'build'
 New-Item -ItemType Directory -Path $buildDir -Force | Out-Null
 $dll = Join-Path $buildDir 'dinput8.dll'
-& $cc cc @CompileFlags -DMR_ENABLE_GAME_HOOKS=1 -shared @sources @MinHookSources -lbcrypt -o $dll
+& $cc cc @CompileFlags -DMR_ENABLE_GAME_HOOKS=1 -shared @sources @MinHookSources -o $dll
 if ($LASTEXITCODE -ne 0) { throw 'DLL build failed.' }
 Get-FileHash -LiteralPath $dll -Algorithm SHA256
