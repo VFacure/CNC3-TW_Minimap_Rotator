@@ -29,8 +29,8 @@ HRESULT WINAPI DirectInput8Create(HINSTANCE instance,DWORD version,REFIID iid,LP
  typedef HRESULT(WINAPI *Fn)(HINSTANCE,DWORD,REFIID,LPVOID*,LPUNKNOWN);
  Fn fn=(Fn)(void*)resolve(0);if(!fn){if(out)*out=NULL;return E_FAIL;}
  #if MR_ENABLE_GAME_HOOKS
- /* Only the inspected game input-bootstrap call site may initiate hooks. */
- if((ULONG_PTR)__builtin_return_address(0)==0x45aa8c)MR_Initialize(NULL);
+ /* The initializer verifies the host; overlays can change the input caller. */
+ MR_Initialize(NULL);
  #endif
  return fn(instance,version,iid,out,outer);
 }
