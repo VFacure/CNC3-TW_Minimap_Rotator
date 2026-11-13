@@ -1,6 +1,50 @@
+# Build outputs, archives and binaries: reproduced by build.ps1/package.ps1; big assets go to GitHub releases.
 /build/
 /dist/
+/release/
+/extracted/
+/package/
+*.zip
 *.dll
 *.exe
-*.zip
+*.pdb
+*.lib
+*.obj
 *.log
+__pycache__/
+*.pyc
+# Third-party toolchain (Zig compiler and its archive): not ours, and over the size limit.
+/tools/compiler/
+/tools/*.zip
+# Stale staging copy of the published tree; the project root is the source of truth now.
+/repository/
+# Research logs and probes: may hold local paths; not part of the published repo.
+/reports/
+/SHA256SUMS.txt
+# Third-party upstream clone (AptEditor, its own git repository).
+/tools/AptConverter/
+# One-off research scripts that hard-code a local home-directory path (public repo: kept out).
+/tools/expand_viewport.py
+/tools/extract_apt.py
+/tools/extract_libhud.py
+/tools/fix_fixed_scale.py
+/tools/fix_presentation.py
+/tools/inspect_dll_loading.py
+/tools/inspect_engine.py
+/tools/inspect_input_bootstrap.py
+/tools/inspect_libhud.py
+/tools/inspect_live_candidate.py
+/tools/inspect_radar.py
+/tools/wire_viewport_layout.py
+# Vendored third-party Python packages (capstone, pefile): install with pip instead.
+/tools/python_deps/
+# Extra upstream MinHook files beyond the subset already published (see tools/minhook/UPSTREAM.txt).
+/tools/minhook/.editorconfig
+/tools/minhook/.github/
+/tools/minhook/.gitignore
+/tools/minhook/AUTHORS.txt
+/tools/minhook/CMakeLists.txt
+/tools/minhook/README.md
+/tools/minhook/build/
+/tools/minhook/cmake/
+/tools/minhook/dll_resources/
