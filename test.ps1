@@ -15,6 +15,7 @@ function Run-Test {
     if ($LASTEXITCODE -ne 0) { throw "$Name failed ($LASTEXITCODE)." }
 }
 Run-Test -Name test_executable_guard -Files @((Join-Path $PSScriptRoot 'tests/test_executable_guard.c'), (Join-Path $PSScriptRoot 'source/executable_guard.c'))
+Run-Test -Name test_vcache -Files @(Join-Path $PSScriptRoot 'tests/test_vcache.c')
 Run-Test -Name test_transform -Files @(Join-Path $PSScriptRoot 'tests/test_transform.c')
 Run-Test -Name test_proxy -Files @(Join-Path $PSScriptRoot 'tests/test_proxy.c') -RunArguments @($dll)
 $startupFiles = @((Join-Path $PSScriptRoot 'tests/test_proxy_startup.c'), (Join-Path $PSScriptRoot 'source/dinput_proxy.c')) + $MinHookSources

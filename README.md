@@ -26,6 +26,10 @@ Before installing hooks, the DLL checks the engine's in-memory camera function, 
 
 It loads from the base game and does not need to be added to each mod. Custom HUDs and other DLL wrappers may need additional support. Download checksums remain available for verifying release files; they do not control runtime activation.
 
+## Performance note (1.0.3)
+
+The camera-angle guard used to ask Windows whether four game pointers were readable on every frame, which is slow on the game's very large memory regions. It now re-validates every 30 frames and immediately whenever a pointer value changes, a check fails or the hook rebinds. Rotation behaviour is unchanged.
+
 ## Build
 
 On Windows, install [Zig 0.13.0](https://ziglang.org/download/0.13.0/) and run:

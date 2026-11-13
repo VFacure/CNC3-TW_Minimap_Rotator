@@ -3,10 +3,16 @@
 #include <string.h>
 #include <math.h>
 #include "camera_adapter.h"
+#include "vcache.h"
 _Static_assert(sizeof(void*)==4,"Tiberium Wars adapter requires x86");
 typedef struct {float x,y,z;} Point3;
 typedef void (__cdecl *Corners)(Point3*,Point3*,Point3*,Point3*,float);
 static int bound;
+static int readable(const void *p,SIZE_T bytes);
+static MRVCache vc={.validate=readable};
+#ifdef MR_TESTING
+MRVCache *mr_camera_test_cache(void){return &vc;}
+#endif
 static int readable(const void *p,SIZE_T bytes){
  MEMORY_BASIC_INFORMATION m;
  if(!p||VirtualQuery(p,&m,sizeof(m))!=sizeof(m)||m.State!=MEM_COMMIT)return 0;
@@ -15,7 +21,7 @@ static int readable(const void *p,SIZE_T bytes){
  return a<e&&bytes<=e-a;
 }
 int mr_camera_bind(void){
- const BYTE *b=(const BYTE*)GetModuleHandleW(NULL);bound=0;
+ const BYTE *b=(const BYTE*)GetModuleHandleW(NULL);bound=0;mr_vc_reset(&vc);
  if((uintptr_t)b!=0x400000||!readable(b,4096))return 0;
  const IMAGE_DOS_HEADER *dos=(const IMAGE_DOS_HEADER*)b;
  if(dos->e_magic!=IMAGE_DOS_SIGNATURE||dos->e_lfanew<0||dos->e_lfanew>2048)return 0;
@@ -25,19 +31,26 @@ int mr_camera_bind(void){
  if(!readable((void*)0x4a5f8f,sizeof(sig))||memcmp((void*)0x4a5f8f,sig,sizeof(sig)))return 0;
  bound=1;return 1;
 }
-int mr_camera_angle(double *angle){
+static int camera_angle(double *angle){
  if(!bound||!angle)return 0;
  /* The projection helper dereferences the display and camera-manager globals. */
  void *display=*(void**)0xc090d0;BYTE *manager=*(BYTE**)0xc129dc;
- if(!readable(display,4)||!readable(manager,0x28))return 0;
+ if(!mr_vc_readable(&vc,0,display,4)||!mr_vc_readable(&vc,1,manager,0x28))return 0;
  BYTE **start=*(BYTE***)(manager+0x18),**end=*(BYTE***)(manager+0x1c);
  unsigned index=*(unsigned*)(manager+0x24);
  uintptr_t lo=(uintptr_t)start,hi=(uintptr_t)end;
- if(hi<lo||hi-lo>4096||index>=(hi-lo)/4||!readable(start,(index+1)*4)||!readable(start[index],4))return 0;
+ if(hi<lo||hi-lo>4096||index>=(hi-lo)/4||!mr_vc_readable(&vc,2,start,(index+1)*4)||!mr_vc_readable(&vc,3,start[index],4))return 0;
  Point3 tl,tr,br,bl;
  ((Corners)0x4a5f8f)(&tl,&tr,&br,&bl,0.0f);
  double dx=(double)tr.x-tl.x,dy=(double)tr.y-tl.y;
  if(!isfinite(dx)||!isfinite(dy)||hypot(dx,dy)<1e-6)return 0;
  /* Map pixels invert world Y. Rotate the projected camera-right vector to +X. */
  *angle=atan2(dy,dx);return 1;
+}
+/* Validate every MR_VCACHE_INTERVAL calls; any rejection or odd result drops the whole cache. */
+int mr_camera_angle(double *angle){
+ if(!bound||!angle)return 0;
+ mr_vc_begin_frame(&vc);
+ if(camera_angle(angle))return 1;
+ mr_vc_reset(&vc);return 0;
 }
